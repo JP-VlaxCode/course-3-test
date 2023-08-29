@@ -1,10 +1,10 @@
-<%- include('header'); -%>
-<%- include('container'); -%>
+<%~ include('./header'); -%>
+<%~ include('./container'); -%>
 <div class="row">
     <div>
       <div class="panel panel-info">
         <div class="panel-heading">
-          <span>Logged In: <%=data[0].username%></span>		  
+          <span>Logged In: <%=it.data[0].username%></span>		  
 		  <span class="pull-right"><a href="/home/logout">Logout</a></span>		  
         </div>
         <div class="panel-body">
@@ -15,15 +15,15 @@
                 <tbody>
 				  <tr>
                     <td>Name:</td>
-                    <td><%=data[0].first_name%> <%=data[0].last_name%></td>
+                    <td><%=it.data[0].first_name%> <%=it.data[0].last_name%></td>
                   </tr>
                   <tr>
                     <td>User Name:</td>
-                    <td><%=data[0].username%></td>
+                    <td><%=it.data[0].username%></td>
                   </tr>
                   <tr>
                     <td>Mobile:</td>
-                    <td><%=data[0].mobile%></td>
+                    <td><%=it.data[0].mobile%></td>
                   </tr>
                 </tbody>
               </table>
@@ -31,4 +31,4 @@
           </div>
         </div>
     </div>
-	<%- include('footer'); -%>
+	<%~ include('./footer'); -%>

@@ -1,5 +1,5 @@
-<%- include('header'); -%>
-<%- include('container'); -%>
+<%~ include('./header'); -%>
+<%~ include('./container'); -%>
 <body>
 	<div class="container">   
 		<div id="loginbox" style="margin-top:50px;" class="mainbox col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">                   
@@ -8,8 +8,8 @@
 					<div class="panel-title">User Sign In</div>
 				</div>    
 				<div style="padding-top:30px" class="panel-body" >
-					<% if (message.length > 0) { %>
-					<div class="alert alert-danger col-sm-12"><%= message %></div>
+					<% if (it.message.length > 0) { %>
+						<div class="alert alert-danger col-sm-12"><% it.message %></div>
 					<% } %>
 					<form id="loginform" class="form-horizontal" role="form" method="post" action="/login">
 						<div style="margin-bottom: 25px" class="input-group">
@@ -38,4 +38,4 @@
 			</div> 
 		</div>
 	</div>
-<%- include('footer'); -%>
+<%~ include('./footer'); -%>

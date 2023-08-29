@@ -19,18 +19,18 @@ exports.signup = async function (req, res) {
             await (await db).execute(sql, [fname, lname, mobile, username, hashedPassword]);
 
             const message = "Your account has been created successfully.";
-            res.render('signup.ejs', { message: message });
+            res.send(eta.render('signup', { message: message }));
          } else {
             const message = "Username and password are mandatory fields.";
-            res.render('signup.ejs', { message: message });
+            res.send(eta.render('signup', { message: message }));
          }
       } else {
-         res.render('signup', { message: '' });
+         res.send(eta.render('signup', { message: '' }));
       }
    } catch (err) {
       console.error(err);
       const message = "An error occurred while processing your request.";
-      res.render('signup.ejs', { message: message });
+      res.send(eta.render('signup', { message: message }));
    }
 };
 
@@ -50,15 +50,15 @@ exports.login = async function (req, res) {
             res.redirect('/home/dashboard');
          } else {
             const message = 'Invalid username or password.';
-            res.render('index.ejs', { message: message });
+            res.send(eta.render('index', { message: message }));
          }
       } else {
-         res.render('index.ejs');
+         res.send(eta.render('index', { message: '' }));
       }
    } catch (err) {
       console.error(err);
       const message = "An error occurred while processing your request.";
-      res.render('index.ejs', { message: message });
+      res.send(eta.render('index', { message: message }));
    }
 };
 
@@ -74,7 +74,7 @@ exports.dashboard = async function (req, res, next) {
       const sql = "SELECT * FROM `users` WHERE `id` = ?";
       const results = await (await db).execute(sql, [userId]);
 
-      res.render('dashboard.ejs', { data: results[0] });
+      res.send(eta.render('dashboard', {data: results[0] }));
    } catch (err) {
       console.error(err);
       res.redirect("/login");
@@ -91,9 +91,9 @@ exports.profile = async function (req, res) {
       }
 
       const sql = "SELECT * FROM `users` WHERE `id` = ?";
-      const result = await (await db).execute(sql, [userId]);
+      const results = await (await db).execute(sql, [userId]);
 
-      res.render('profile.ejs', { data: result[0] });
+      res.send(eta.render('profile', {data: results[0] }));
    } catch (err) {
       console.error(err);
       res.redirect("/login");

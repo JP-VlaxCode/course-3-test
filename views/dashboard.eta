@@ -1,6 +1,6 @@
 <html lang="en">
-<%- include('header'); -%>
-<%- include('container'); -%>
+<%~ include('./header'); -%>
+<%~ include('./container'); -%>
   <div class="jumbotron">
 	<h1>Dashboard</h1>
 	<p>Welcome here</p>
@@ -8,4 +8,4 @@
 	  <a href="/home/profile">View Profile</a>
 	</p>
   </div>
-<%- include('footer'); -%>
+<%~ include('./footer'); -%>

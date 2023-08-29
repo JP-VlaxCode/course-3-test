@@ -7,6 +7,7 @@ const session = require('express-session');
 const app = express();
 const mysql = require('mysql2/promise');
 const bodyParser = require("body-parser");
+const { Eta } = require("eta")
 
 const env = require("./env");
 
@@ -21,8 +22,17 @@ const connection = mysql.createConnection({
 global.db = connection;
 
 app.set('port', process.env.PORT || 8080);
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
+
+let viewpath = path.join(__dirname + '/views');
+
+let eta = new Eta({ views: viewpath, cache: true });
+
+app.engine("eta", eta.render)
+app.set("view engine", "eta")
+app.set('views', viewpath);
+
+global.eta = eta;
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
