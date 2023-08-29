@@ -8,11 +8,13 @@ const app = express();
 const mysql = require('mysql2/promise');
 const bodyParser = require("body-parser");
 
+const env = require("./env");
+
 const connection = mysql.createConnection({
-  host: '',
-  user: '',
-  password: '',
-  database: '',
+  host: env.default.host,
+  user: env.default.user,
+  password: env.default.password,
+  database: env.default.database,
   port: 3306
 });
 
