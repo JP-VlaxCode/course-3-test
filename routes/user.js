@@ -1,94 +1,110 @@
-exports.signup = function (req, res) {
-   message = '';
-   if (req.method == "POST") {
-      var post = req.body;
-      var username = post.username;
-      var password = post.password;
-      var fname = post.first_name;
-      var lname = post.last_name;
-      var mobile = post.mobile;
-      if (username != '' && password != '') {
-         var sql = "INSERT INTO `users`(`first_name`,`last_name`,`mobile`,`username`, `password`) VALUES ('" + fname + "','" + lname + "','" + mobile + "','" + username + "','" + password + "')";
+const bcrypt = require('bcrypt');
 
-         db.query(sql).then(message => {
-            message = "Your account has been created succesfully.";
+exports.signup = async function (req, res) {
+   try {
+      if (req.method === "POST") {
+         const post = req.body;
+         const username = post.username;
+         const password = post.password;
+         const fname = post.first_name;
+         const lname = post.last_name;
+         const mobile = post.mobile;
+
+         if (username && password) {
+            const salt = bcrypt.genSaltSync(10);
+
+            const hashedPassword = bcrypt.hashSync(password, salt);
+
+            const sql = "INSERT INTO `users` (`first_name`, `last_name`, `mobile`, `username`, `password`) VALUES (?, ?, ?, ?, ?)";
+            await (await db).execute(sql, [fname, lname, mobile, username, hashedPassword]);
+
+            const message = "Your account has been created successfully.";
             res.render('signup.ejs', { message: message });
-         }).catch(err => console.log(err))
+         } else {
+            const message = "Username and password are mandatory fields.";
+            res.render('signup.ejs', { message: message });
+         }
       } else {
-         message = "Username and password is mandatory field.";
-         res.render('signup.ejs', { message: message });
+         res.render('signup', { message: '' });
       }
-
-   } else {
-      res.render('signup');
+   } catch (err) {
+      console.error(err);
+      const message = "An error occurred while processing your request.";
+      res.render('signup.ejs', { message: message });
    }
 };
 
-exports.login = function (req, res) {
-   var message = '';
+exports.login = async function (req, res) {
+   try {
+      if (req.method === "POST") {
+         const post = req.body;
+         const username = post.username;
+         const password = post.password;
 
-   if (req.method == "POST") {
-      var post = req.body;
-      var username = post.username;
-      var password = post.password;
+         const sql = "SELECT id, first_name, last_name, username, password FROM `users` WHERE `username` = ?";
+         const results = await (await db).execute(sql, [username]);
 
-      var sql = "SELECT id, first_name, last_name, username FROM `users` WHERE `username`='" + username + "' and password = '" + password + "'";
-      db.query(sql).then(results => {
-         if (results.length) {
-            req.session.userId = results[0].id;
-            req.session.user = results[0];
-            console.log(results[0].id);
+         if (results.length && bcrypt.compareSync(password, results[0][0].password)) {
+            req.session.userId = results[0][0].id;
+            req.session.user = results[0][0];
             res.redirect('/home/dashboard');
-         }
-         else {
-            message = 'You have entered invalid username or password.';
+         } else {
+            const message = 'Invalid username or password.';
             res.render('index.ejs', { message: message });
          }
-      }).catch(err => {
-         console.log(err);
-         message = 'You have entered invalid username or password.';
-         res.render('index.ejs', { message: message });
-
-      })
-   } else {
+      } else {
+         res.render('index.ejs');
+      }
+   } catch (err) {
+      console.error(err);
+      const message = "An error occurred while processing your request.";
       res.render('index.ejs', { message: message });
    }
-
 };
 
+exports.dashboard = async function (req, res, next) {
+   try {
+      const userId = req.session.userId;
 
-exports.dashboard = function (req, res, next) {
+      if (!userId) {
+         res.redirect("/login");
+         return;
+      }
 
-   var user = req.session.user,
-      userId = req.session.userId;
-   console.log('ddd=' + userId);
-   if (userId == null) {
+      const sql = "SELECT * FROM `users` WHERE `id` = ?";
+      const results = await (await db).execute(sql, [userId]);
+
+      res.render('dashboard.ejs', { data: results[0] });
+   } catch (err) {
+      console.error(err);
       res.redirect("/login");
-      return;
    }
-
-   var sql = "SELECT * FROM `users` WHERE `id`='" + userId + "'";
-   db.query(sql).then(results => {
-      res.render('dashboard.ejs', { data: results });
-   }).catch(err => console.log(err))
 };
 
-exports.profile = function (req, res) {
+exports.profile = async function (req, res) {
+   try {
+      const userId = req.session.userId;
 
-   var userId = req.session.userId;
-   if (userId == null) {
+      if (!userId) {
+         res.redirect("/login");
+         return;
+      }
+
+      const sql = "SELECT * FROM `users` WHERE `id` = ?";
+      const result = await (await db).execute(sql, [userId]);
+
+      res.render('profile.ejs', { data: result[0] });
+   } catch (err) {
+      console.error(err);
       res.redirect("/login");
-      return;
    }
-
-   var sql = "SELECT * FROM `users` WHERE `id`='" + userId + "'";
-   db.query(sql).then(result => {
-      res.render('profile.ejs', { data: result });
-   }).catch(err => console.log(err))
 };
 
 exports.logout = function (req, res) {
    req.session.destroy(function (err) {
+      if (err) {
+         console.error(err);
+      }
       res.redirect("/login");
-   })
+   });
 };

@@ -5,19 +5,18 @@ const express = require('express')
   , path = require('path');
 const session = require('express-session');
 const app = express();
-const mysql = require('mysqli');
+const mysql = require('mysql2/promise');
 const bodyParser = require("body-parser");
 
-const connection = new mysql({
-  host: 'db4free.net',
-  user: 'securitysoft',
+const connection = mysql.createConnection({
+  host: '',
+  user: '',
   password: '',
-  database: 'securitysoft',
+  database: '',
   port: 3306
 });
 
-const con = connection.emit();
-global.db = con;
+global.db = connection;
 
 app.set('port', process.env.PORT || 8080);
 app.set('views', __dirname + '/views');
