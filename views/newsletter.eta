@@ -1,0 +1,20 @@
+<html lang="en">
+<%~ include('./header'); -%>
+<%~ include('./container'); -%>
+
+<div class="container">
+
+<h1>NEWSLETTER AI</h1>
+	<button id="btn-signup" type="button" onClick="window.location.reload()" class="btn btn-info">Reload</button>
+
+	<% it.newsData.articles.forEach(function(article){ 
+	 if (article.title && article.description && article.publishedAt && article.urlToImage) { %>
+		<h2><%= article.title %></h2>
+		<p><%= article.description %></p>
+		<p><%= article.publishedAt.slice(0, 10) %> <%= article.publishedAt.slice(11, 16) %></p>
+		<img src="<%= article.urlToImage %>" alt="" class="img-responsive" /> 
+    <% }
+	}); %>
+					            							
+</div>
+<%~ include('./footer'); -%>
