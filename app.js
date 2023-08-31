@@ -1,15 +1,19 @@
-const express = require('express')
-  , routes = require('./routes')
-  , user = require('./routes/user')
-  , http = require('http')
-  , path = require('path');
+const express = require('express');
+const axios = require('axios');
+const http = require('http');
+const path = require('path');
 const session = require('express-session');
-const app = express();
 const mysql = require('mysql2/promise');
 const bodyParser = require("body-parser");
-const { Eta } = require("eta")
-
+const { Eta } = require("eta");
+const routes = require('./routes');
+const user = require('./routes/user');
 const env = require("./env");
+
+const app = express();
+
+//URL API newsletter AI
+const newsletterApiUrl = 'https://newsapi.org/v2/everything?q=ai&apiKey=21621e6958904a52a48bc37611c0cbe0';
 
 const connection = mysql.createConnection({
   host: env.default.host,
@@ -44,13 +48,24 @@ app.use(session({
   cookie: { maxAge: 60000 }
 }))
 
-app.get('/', routes.index);
-app.get('/signup', user.signup);
-app.post('/signup', user.signup);
-app.get('/login', routes.index);
-app.post('/login', user.login);
-app.get('/home/dashboard', user.dashboard);
-app.get('/home/logout', user.logout);
-app.get('/home/profile', user.profile);
+// Ruta para mostrar las noticias (Página de inicio)
+app.get('/', async (req, res) => {
+  try {
+    const response = await axios.get(newsletterApiUrl);
+    const newsData = response.data;
+	res.send(global.eta.render("newsletter", { newsData }));
+  } catch (error) {
+    console.error('Error al obtener noticias:', error);
+    res.status(500).send('Error al obtener noticias');
+  }
+});
 
-app.listen(8080)
+// Resto de las rutas
+app.get('/subscribe', user.subscribe);
+app.post('/subscribe', user.subscribe);
+
+// Iniciar el servidor
+const server = http.createServer(app);
+server.listen(app.get('port'), () => {
+  console.log(`Servidor en funcionamiento en http://localhost:${app.get('port')}`);
+});
