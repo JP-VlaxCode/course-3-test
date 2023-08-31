@@ -3,5 +3,6 @@ exports.default = {
     user: '',
     password: '',
     database: '',
-    port: 3306
+    port: 3306,
+    newsletter: ''
 }

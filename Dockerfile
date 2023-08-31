@@ -10,6 +10,7 @@ WORKDIR /directory
 
 # Copia de Archivos
 COPY app.js /directory/app.js
+COPY env.js /directory/env.js
 COPY package.json /directory/package.json
 
 RUN npm install
