@@ -1,110 +1,38 @@
 const bcrypt = require('bcrypt');
 
-exports.signup = async function (req, res) {
+// Función para validar una dirección de correo electrónico
+function isValidEmail(email) {
+   const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+   return emailRegex.test(email);
+}
+
+exports.subscribe = async function (req, res) {
    try {
+      let message = '';
+      let errorMessage = '';
+
       if (req.method === "POST") {
          const post = req.body;
-         const username = post.username;
-         const password = post.password;
-         const fname = post.first_name;
-         const lname = post.last_name;
-         const mobile = post.mobile;
+         const name = post.name || null;
+         const email = post.email;
 
-         if (username && password) {
-            const salt = bcrypt.genSaltSync(10);
+         if (email && isValidEmail(email)) {
 
-            const hashedPassword = bcrypt.hashSync(password, salt);
+            const sql = "INSERT INTO `subscribers` (`name`, `email`) VALUES (?, ?)";
+            await (await db).execute(sql, [name, email]);
 
-            const sql = "INSERT INTO `users` (`first_name`, `last_name`, `mobile`, `username`, `password`) VALUES (?, ?, ?, ?, ?)";
-            await (await db).execute(sql, [fname, lname, mobile, username, hashedPassword]);
-
-            const message = "Your account has been created successfully.";
-            res.send(eta.render('signup', { message: message }));
+            message = "Congratulations! Your email address " + email + " has been registered successfully to the Newsletter.";
          } else {
-            const message = "Username and password are mandatory fields.";
-            res.send(eta.render('signup', { message: message }));
+            errorMessage = "Invalid email or email is mandatory.";
          }
-      } else {
-         res.send(eta.render('signup', { message: '' }));
       }
+
+      res.send(eta.render('subscribe', { message, errorMessage }));
    } catch (err) {
       console.error(err);
-      const message = "An error occurred while processing your request.";
-      res.send(eta.render('signup', { message: message }));
+      const errorMessage = "An error occurred while processing your request.";
+      res.send(eta.render('subscribe', { errorMessage }));
    }
 };
 
-exports.login = async function (req, res) {
-   try {
-      if (req.method === "POST") {
-         const post = req.body;
-         const username = post.username;
-         const password = post.password;
 
-         const sql = "SELECT id, first_name, last_name, username, password FROM `users` WHERE `username` = ?";
-         const results = await (await db).execute(sql, [username]);
-
-         if (results.length && bcrypt.compareSync(password, results[0][0].password)) {
-            req.session.userId = results[0][0].id;
-            req.session.user = results[0][0];
-            res.redirect('/home/dashboard');
-         } else {
-            const message = 'Invalid username or password.';
-            res.send(eta.render('index', { message: message }));
-         }
-      } else {
-         res.send(eta.render('index', { message: '' }));
-      }
-   } catch (err) {
-      console.error(err);
-      const message = "An error occurred while processing your request.";
-      res.send(eta.render('index', { message: message }));
-   }
-};
-
-exports.dashboard = async function (req, res, next) {
-   try {
-      const userId = req.session.userId;
-
-      if (!userId) {
-         res.redirect("/login");
-         return;
-      }
-
-      const sql = "SELECT * FROM `users` WHERE `id` = ?";
-      const results = await (await db).execute(sql, [userId]);
-
-      res.send(eta.render('dashboard', {data: results[0] }));
-   } catch (err) {
-      console.error(err);
-      res.redirect("/login");
-   }
-};
-
-exports.profile = async function (req, res) {
-   try {
-      const userId = req.session.userId;
-
-      if (!userId) {
-         res.redirect("/login");
-         return;
-      }
-
-      const sql = "SELECT * FROM `users` WHERE `id` = ?";
-      const results = await (await db).execute(sql, [userId]);
-
-      res.send(eta.render('profile', {data: results[0] }));
-   } catch (err) {
-      console.error(err);
-      res.redirect("/login");
-   }
-};
-
-exports.logout = function (req, res) {
-   req.session.destroy(function (err) {
-      if (err) {
-         console.error(err);
-      }
-      res.redirect("/login");
-   });
-};
